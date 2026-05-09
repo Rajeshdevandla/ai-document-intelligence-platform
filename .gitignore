@@ -1,0 +1,65 @@
+# ─── Java / Maven ─────────────────────────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ─── Python ───────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+
+# ─── Node / React ──────────────────────────────────────────────────────────
+node_modules/
+frontend/build/
+frontend/.env.local
+frontend/.env.production
+npm-debug.log*
+yarn-error.log*
+
+# ─── Terraform ─────────────────────────────────────────────────────────────
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+.terraform.lock.hcl
+crash.log
+
+# ─── IDE / OS ──────────────────────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# ─── Secrets ───────────────────────────────────────────────────────────────
+.env
+*.pem
+*.key
+*.p12
+secrets/
+
+# ─── Docker ────────────────────────────────────────────────────────────────
+.dockerignore
+
+# ─── Cypress ───────────────────────────────────────────────────────────────
+frontend/cypress/videos/
+frontend/cypress/screenshots/
