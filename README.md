@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🧠 AI Document Intelligence Platform
+#  AI Document Intelligence Platform
 
 **Enterprise-grade AI-powered document processing system**
 
@@ -15,13 +15,13 @@
 
 *Processes PDFs and images → OCR → LLM Extraction → Structured JSON → Analytics Dashboard*
 
-[🚀 Live Demo](#demo) • [📖 API Docs](docs/api-contracts.md) • [🏗️ Architecture](#architecture) • [🛠️ Setup](#setup)
+[ Live Demo](#demo) • [ API Docs](docs/api-contracts.md) • [ Architecture](#architecture) • [ Setup](#setup)
 
 </div>
 
 ---
 
-## 📌 What This System Does
+##  What This System Does
 
 | Step | Technology | Description |
 |------|-----------|-------------|
@@ -36,7 +36,7 @@
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -77,7 +77,7 @@
 
 ---
 
-## 📂 Repository Structure
+##  Repository Structure
 
 ```
 ai-document-intelligence-platform/
@@ -111,7 +111,7 @@ ai-document-intelligence-platform/
 
 ---
 
-## 🧠 LLM Extraction Output
+##  LLM Extraction Output
 
 Every processed document produces a structured JSON payload:
 
@@ -146,7 +146,7 @@ Every processed document produces a structured JSON payload:
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - Java 17+, Maven 3.9+
@@ -186,7 +186,7 @@ This starts: Kafka, Zookeeper, PostgreSQL, all 4 Java microservices, Python pipe
 
 ---
 
-## 📊 Analytics Dashboard Features
+##  Analytics Dashboard Features
 
 - **Total documents processed** — real-time counter
 - **Processing time distribution** — histogram by document type
@@ -197,7 +197,7 @@ This starts: Kafka, Zookeeper, PostgreSQL, all 4 Java microservices, Python pipe
 
 ---
 
-## 🧪 Testing
+##  Testing
 
 ```bash
 # Backend — JUnit 5 + Mockito
@@ -213,7 +213,7 @@ cd python-pipeline && pytest tests/ -v --cov=.
 
 ---
 
-## 🎥 Demo Script (for Recruiters)
+##  Demo Script (for Recruiters)
 
 1. **Upload** a PDF invoice via the drag-and-drop UI
 2. **Watch** real-time Kafka event streaming in the status page
@@ -224,7 +224,7 @@ cd python-pipeline && pytest tests/ -v --cov=.
 
 ---
 
-## 👨‍💻 About the Developer
+##  About the Developer
 
 <table>
 <tr>
@@ -232,11 +232,11 @@ cd python-pipeline && pytest tests/ -v --cov=.
 
 **Rajesh Kumar** — Full Stack Developer
 
-🎯 **4+ years** building enterprise Java, Spring Boot, AWS & React systems  
-📍 **Chicago, IL**  
-🔗 **Portfolio:** [rajeshdevandla.github.io](https://rajeshdevandla.github.io)  
-💼 **LinkedIn:** [linkedin.com/in/rajeshdevandla](https://linkedin.com/in/rajeshdevandla)  
-🐙 **GitHub:** [github.com/Rajeshdevandla](https://github.com/Rajeshdevandla)
+ **4+ years** building enterprise Java, Spring Boot, AWS & React systems  
+ **Chicago, IL**  
+ **Portfolio:** [rajeshdevandla.github.io](https://rajeshdevandla.github.io)  
+ **LinkedIn:** [linkedin.com/in/rajeshdevandla](https://linkedin.com/in/rajeshdevandla)  
+ **GitHub:** [github.com/Rajeshdevandla](https://github.com/Rajeshdevandla)
 
 **Core Skills:** Java 17 · Spring Boot · AWS · React · Kafka · PostgreSQL · Docker · Kubernetes · LLM APIs
 
@@ -246,7 +246,7 @@ cd python-pipeline && pytest tests/ -v --cov=.
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
@@ -262,7 +262,7 @@ cd python-pipeline && pytest tests/ -v --cov=.
 
 ---
 
-## 📄 License
+##  License
 
 MIT License — see [LICENSE](LICENSE) for details.
 
@@ -270,8 +270,8 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-⭐ **Star this repo** if it helped you or impressed you!
+ **Star this repo** if it helped you or impressed you!
 
-*Built with ❤️ by [Rajesh Kumar](https://rajeshdevandla.github.io)*
+*Built with  by [Rajesh Kumar](https://rajeshdevandla.github.io)*
 
 </div>
