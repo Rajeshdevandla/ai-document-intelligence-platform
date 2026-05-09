@@ -1,0 +1,43 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: upload-service
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+        spring.json.add.type.headers: false
+  security:
+    enabled: false
+
+aws:
+  region: ${AWS_REGION:us-east-1}
+  s3:
+    bucket-name: ${S3_BUCKET_NAME:ai-doc-intelligence-uploads}
+    presigned-url-expiry-seconds: 900
+  dynamodb:
+    table-name: ${DYNAMODB_TABLE:document-metadata}
+
+app:
+  base-url: ${APP_BASE_URL:http://localhost:8081}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.rajesh: DEBUG
+    org.springframework.kafka: INFO
