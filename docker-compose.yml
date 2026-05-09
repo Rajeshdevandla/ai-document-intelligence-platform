@@ -1,0 +1,138 @@
+version: '3.9'
+
+services:
+  # ─── Kafka Ecosystem ───────────────────────────────
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports: ["2181:2181"]
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports: ["9092:9092"]
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 15s
+      retries: 10
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    depends_on: [kafka]
+    ports: ["8080:8080"]
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+
+  # ─── Database ──────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: dociq_analytics
+      POSTGRES_USER: dociq
+      POSTGRES_PASSWORD: dociq_secret
+    ports: ["5432:5432"]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dociq"]
+      interval: 10s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
+  # ─── Java Microservices ────────────────────────────
+  upload-service:
+    build: ./backend/upload-service
+    ports: ["8081:8081"]
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-ai-doc-intelligence-uploads}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/api/v1/documents/health"]
+      interval: 30s
+      retries: 5
+
+  processing-service:
+    build: ./backend/processing-service
+    ports: ["8082:8082"]
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      PYTHON_PIPELINE_URL: http://python-pipeline:8090
+
+  extraction-service:
+    build: ./backend/extraction-service
+    ports: ["8083:8083"]
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      LLM_DEFAULT_PROVIDER: ${LLM_DEFAULT_PROVIDER:-openai}
+
+  analytics-service:
+    build: ./backend/analytics-service
+    ports: ["8084:8084"]
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DB_URL: jdbc:postgresql://postgres:5432/dociq_analytics
+      DB_USERNAME: dociq
+      DB_PASSWORD: dociq_secret
+
+  # ─── Python Pipeline ───────────────────────────────
+  python-pipeline:
+    build: ./python-pipeline
+    ports: ["8090:8090"]
+    environment:
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8090/health')"]
+      interval: 30s
+      retries: 5
+
+  # ─── Frontend ──────────────────────────────────────
+  frontend:
+    build: ./frontend
+    ports: ["3000:80"]
+    depends_on: [upload-service, analytics-service]
+
+volumes:
+  postgres_data:
+  redis_data:
