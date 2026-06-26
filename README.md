@@ -1,17 +1,101 @@
 # AI Document Intelligence Platform
 
-An end-to-end document processing system that uploads PDFs, extracts text using OCR, sends the content to an LLM API for structured data extraction, and displays results on a React dashboard.
+> **End-to-end document processing** — upload PDFs, extract structured data using OCR + LLM, and view results on a real-time React dashboard.
 
-Built as a portfolio project to explore how Java microservices, Python OCR pipelines, and LLM APIs can be combined into a practical workflow — inspired by AI automation work done at Mutual of Omaha (2025).
+[![Java 17](https://img.shields.io/badge/Java-17-007396.svg)](https://www.java.com/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-6DB33F.svg)](https://spring.io/projects/spring-boot)
+[![React](https://img.shields.io/badge/React-18-61DAFB.svg)](https://reactjs.org/)
+[![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
+[![AWS](https://img.shields.io/badge/AWS-Textract%20%7C%20S3%20%7C%20Kafka-FF9900.svg)](https://aws.amazon.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg)](https://www.docker.com/)
 
-## What It Does
+---
 
-- User uploads a PDF or image via the React frontend
-- File is stored in AWS S3 and an event is published to Kafka
-- A Python service runs OCR on the document using AWS Textract
-- Extracted text is sent to OpenAI API to pull out structured fields (dates, amounts, names, etc.)
-- Results are stored in PostgreSQL and displayed on a React dashboard
-- Dashboard shows document status, extracted fields, and processing history
+## Live Demo
+
+> 🚀 **[Coming soon — deploying to AWS]**
+>
+> To run locally, follow the [Quick Start](#quick-start) below.
+
+---
+
+## What Problem This Solves
+
+Manual data entry from invoices, contracts, and insurance documents is slow, error-prone, and expensive. This platform automates the full pipeline: a document goes in, structured JSON data comes out — extracted by OCR and validated by an LLM — with zero manual intervention.
+
+**Real-world inspiration:** Built based on AI automation work done at Mutual of Omaha (2025), where integrating OpenAI API reduced repetitive manual processing steps on an internal workflow.
+
+---
+
+## Demo
+
+**Input:** Upload an invoice PDF via the React dashboard
+
+**Extracted output (JSON):**
+```json
+{
+  "document_type": "Invoice",
+  "vendor": "Acme Corp",
+  "invoice_date": "2024-03-15",
+  "total_amount": 4590.00,
+  "line_items": [
+    { "description": "Cloud Services", "amount": 4590.00 }
+  ],
+  "confidence_score": 0.94
+}
+```
+
+**Dashboard view:** Document status (Uploaded → OCR → Extracted → Complete), extracted fields table, processing history with timestamps.
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              AI Document Intelligence Platform                   │
+└─────────────────────────────────────────────────────────────────┘
+
+  USER UPLOAD FLOW
+  ─────────────────
+  React Frontend (TypeScript)
+       │  HTTP POST /upload
+       ▼
+  Upload Service (Spring Boot)
+       │  ├─ store file → AWS S3
+       │  └─ publish event → Apache Kafka
+       ▼
+  Processing Service (Spring Boot, Kafka consumer)
+       │
+       ├──────────────────────────────────┐
+       │                                  │
+       ▼                                  ▼
+  Python OCR Service                 (async, decoupled)
+  (FastAPI + AWS Textract)
+       │  extracted raw text
+       ▼
+  LLM Extraction (OpenAI GPT-4o)
+       │  structured JSON fields
+       ▼
+  PostgreSQL (results) + DynamoDB (metadata)
+       │
+       ▼
+  Analytics Service
+       │
+       ▼
+  React Dashboard (real-time status via polling)
+
+  SERVICES
+  ────────
+  Upload Service    → handles file intake, S3 presigned URLs, Kafka publish
+  Processing Service → Kafka consumer, coordinates OCR + extraction steps
+  Python OCR Service → FastAPI app calling AWS Textract, text cleaning
+  LLM Extraction    → Spring Boot calling OpenAI API, structured JSON output
+  Analytics Service → aggregates results, feeds the dashboard
+```
+
+---
 
 ## Tech Stack
 
@@ -26,75 +110,105 @@ Built as a portfolio project to explore how Java microservices, Python OCR pipel
 | Cloud | AWS S3, Lambda, SQS, EC2 |
 | DevOps | Docker, Docker Compose, GitHub Actions |
 
-## How It Works
+---
 
-```
-React UI → Upload Service (Spring Boot) → S3 + Kafka
-                                         ↓
-                              Processing Service (Spring Boot)
-                                         ↓
-                              Python OCR Service (AWS Textract)
-                                         ↓
-                              LLM Extraction (OpenAI API)
-                                         ↓
-                              PostgreSQL → Analytics Service
-                                         ↓
-                              React Dashboard
-```
+## Quick Start
 
-## Services
+**Prerequisites:** Java 17+, Node.js 18+, Python 3.11+, Docker, AWS CLI configured
 
-- **Upload Service** — handles file upload, generates S3 presigned URLs, publishes Kafka event
-- **Processing Service** — Kafka consumer, coordinates OCR and extraction steps
-- **Python OCR Pipeline** — FastAPI app that calls AWS Textract and cleans extracted text
-- **LLM Extraction** — sends cleaned text to OpenAI API, returns structured JSON
-- **Analytics Service** — aggregates results for the dashboard
-
-## Running Locally
-
-Prerequisites: Java 17+, Node.js 18+, Python 3.11+, Docker, AWS CLI configured
+### 1. Clone and configure
 
 ```bash
 git clone https://github.com/Rajeshdevandla/ai-document-intelligence-platform.git
 cd ai-document-intelligence-platform
 cp .env.example .env
 # Add your AWS credentials and OpenAI API key to .env
+```
+
+Required environment variables:
+
+| Variable | Description |
+|---|---|
+| `AWS_ACCESS_KEY_ID` | IAM user access key |
+| `AWS_SECRET_ACCESS_KEY` | IAM user secret key |
+| `AWS_REGION` | AWS region (e.g. `us-east-1`) |
+| `AWS_S3_BUCKET` | S3 bucket for document storage |
+| `OPENAI_API_KEY` | OpenAI API key |
+| `POSTGRES_URL` | PostgreSQL connection string |
+
+### 2. Start all services
+
+```bash
 docker-compose up -d
 ```
 
-Frontend: `http://localhost:3000`
-Upload API: `http://localhost:8081/api`
-Python Pipeline: `http://localhost:8090/docs`
+This starts: Kafka, PostgreSQL, Upload Service, Processing Service, Python OCR Service, Analytics Service, and React frontend.
 
-## Sample Extraction Output
-
-```json
-{
-  "document_type": "Invoice",
-  "vendor": "Acme Corp",
-  "invoice_date": "2024-03-15",
-  "total_amount": 4590.00,
-  "line_items": [
-    { "description": "Cloud Services", "amount": 4590.00 }
-  ],
-  "confidence_score": 0.94
-}
-```
-
-## What I Applied Here
-
-- Splitting responsibilities across small, focused Spring Boot services
-- Kafka for async, decoupled event flow between upload and processing
-- Integrating a Python FastAPI service with a Java backend
-- Calling OpenAI API from a Spring Boot service and parsing the structured response
-- React dashboard with real-time status updates via polling
-- GitHub Actions CI to build and test on every push
-
-## Background
-
-Inspired by real work at Mutual of Omaha (2025) where I integrated the OpenAI API to automate an internal workflow and reduce repetitive manual processing steps. This project explores that idea more fully as a standalone system.
+| Service | URL |
+|---|---|
+| React Dashboard | http://localhost:3000 |
+| Upload API | http://localhost:8081/api |
+| Python OCR Pipeline | http://localhost:8090/docs |
 
 ---
 
-**Rajesh Kumar** — Full Stack Java Developer | Chicago, IL
-[Portfolio](https://rajeshdevandla.github.io) · [GitHub](https://github.com/Rajeshdevandla)
+## Project Structure
+
+```
+ai-document-intelligence-platform/
+├── frontend/                  # React 18 + TypeScript dashboard
+├── backend/
+│   ├── upload-service/        # Spring Boot — file intake + Kafka publish
+│   ├── processing-service/    # Spring Boot — Kafka consumer + orchestration
+│   ├── analytics-service/     # Spring Boot — dashboard aggregation
+│   └── llm-extraction/        # Spring Boot — OpenAI API integration
+├── python-pipeline/           # FastAPI + AWS Textract OCR service
+├── infra/
+│   ├── docker-compose.yml
+│   └── k8s/                   # Kubernetes manifests
+├── docs/                      # Architecture diagrams
+├── .env.example
+└── README.md
+```
+
+---
+
+## Key Engineering Decisions
+
+**Kafka for async processing.** Upload and processing are fully decoupled — the upload service returns immediately after storing to S3 and publishing the event. The processing service picks it up asynchronously. This means the UI is never blocked waiting for OCR or LLM calls.
+
+**Python for OCR, Java for orchestration.** AWS Textract has the best Python SDK support. The Java backend handles business logic, routing, and persistence. The two communicate via a clean REST contract, keeping each service in its strongest language.
+
+**LLM for structured extraction.** Raw OCR output is messy. Rather than writing fragile regex parsers for every document type, the extracted text is sent to GPT-4o with a structured output prompt. This handles invoice layouts, contract formats, and table structures without custom parsing logic per document type.
+
+---
+
+## CI/CD
+
+GitHub Actions pipeline on every push:
+
+- Build Java services with Maven
+- Run unit and integration tests
+- Build Python service and run pytest
+- Build Docker images
+- Deploy to staging (on merge to `main`)
+
+---
+
+## What I'd Build Next
+
+- **More document types** — add support for bank statements, W-2s, medical records with type-specific extraction prompts
+- **Confidence thresholds** — route low-confidence extractions to human review queue
+- **Streaming status** — replace polling with WebSocket for real-time dashboard updates
+- **Live hosted demo** — deploy to AWS ECS with a public demo endpoint
+
+---
+
+## Related Projects
+
+- [AskDocs AI](https://github.com/Rajeshdevandla/askdocs-ai) — PDF RAG chatbot using Amazon Bedrock and FAISS
+- [AgentFlow](https://github.com/Rajeshdevandla/agent-flow) — Multi-agent orchestration system with Constitutional AI safety layer
+
+---
+
+*Built by [Rajesh Kumar](https://rajeshdevandla.github.io) — Full Stack Java & AI Developer | Chicago, IL*
