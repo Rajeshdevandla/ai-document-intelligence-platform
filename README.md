@@ -14,7 +14,7 @@
 
 ## Live Demo
 
-> 🚀 **[Coming soon — deploying to AWS]**
+> **[Coming soon — deploying to AWS]**
 >
 > To run locally, follow the [Quick Start](#quick-start) below.
 
