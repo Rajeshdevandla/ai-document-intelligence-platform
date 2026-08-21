@@ -1,12 +1,12 @@
 # AI Document Intelligence Platform
 
-> **End-to-end document processing** — upload PDFs, extract structured data using OCR + LLM, and view results on a real-time React dashboard.
+> **End-to-end document processing** — upload PDFs, extract structured data using OCR + LLM, and view processing results on a React dashboard.
 
 [![Java 17](https://img.shields.io/badge/Java-17-007396.svg)](https://www.java.com/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-6DB33F.svg)](https://spring.io/projects/spring-boot)
 [![React](https://img.shields.io/badge/React-18-61DAFB.svg)](https://reactjs.org/)
 [![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
-[![AWS](https://img.shields.io/badge/AWS-Textract%20%7C%20S3%20%7C%20Kafka-FF9900.svg)](https://aws.amazon.com/)
+[![AWS](https://img.shields.io/badge/AWS-Textract%20%7C%20S3-FF9900.svg)](https://aws.amazon.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg)](https://www.docker.com/)
 
@@ -22,7 +22,7 @@
 
 ## What Problem This Solves
 
-Manual data entry from invoices, contracts, and insurance documents is slow, error-prone, and expensive. This platform automates the full pipeline: a document goes in, structured JSON data comes out — extracted by OCR and validated by an LLM — with zero manual intervention.
+Manual data entry from invoices, contracts, and insurance documents is slow, error-prone, and expensive. This platform automates the full pipeline: a document goes in, structured JSON data comes out — extracted by OCR and validated by an LLM — with a repeatable asynchronous workflow.
 
 **Real-world inspiration:** Built based on AI automation work done at Mutual of Omaha (2025), where integrating OpenAI API reduced repetitive manual processing steps on an internal workflow.
 
@@ -84,7 +84,7 @@ Manual data entry from invoices, contracts, and insurance documents is slow, err
   Analytics Service
        │
        ▼
-  React Dashboard (real-time status via polling)
+  React Dashboard (status updates via polling)
 
   SERVICES
   ────────
@@ -107,8 +107,8 @@ Manual data entry from invoices, contracts, and insurance documents is slow, err
 | LLM | OpenAI API (GPT-4o) |
 | Messaging | Apache Kafka |
 | Database | PostgreSQL, AWS DynamoDB |
-| Cloud | AWS S3, Lambda, SQS, EC2 |
-| DevOps | Docker, Docker Compose, GitHub Actions |
+| Cloud | AWS S3, Textract |
+| DevOps | Docker, Docker Compose |
 
 ---
 
@@ -161,12 +161,9 @@ ai-document-intelligence-platform/
 │   ├── upload-service/        # Spring Boot — file intake + Kafka publish
 │   ├── processing-service/    # Spring Boot — Kafka consumer + orchestration
 │   ├── analytics-service/     # Spring Boot — dashboard aggregation
-│   └── llm-extraction/        # Spring Boot — OpenAI API integration
+│   └── extraction-service/    # Spring Boot — OpenAI API integration
 ├── python-pipeline/           # FastAPI + AWS Textract OCR service
-├── infra/
-│   ├── docker-compose.yml
-│   └── k8s/                   # Kubernetes manifests
-├── docs/                      # Architecture diagrams
+├── docker-compose.yml         # Local multi-service environment
 ├── .env.example
 └── README.md
 ```
@@ -180,18 +177,6 @@ ai-document-intelligence-platform/
 **Python for OCR, Java for orchestration.** AWS Textract has the best Python SDK support. The Java backend handles business logic, routing, and persistence. The two communicate via a clean REST contract, keeping each service in its strongest language.
 
 **LLM for structured extraction.** Raw OCR output is messy. Rather than writing fragile regex parsers for every document type, the extracted text is sent to GPT-4o with a structured output prompt. This handles invoice layouts, contract formats, and table structures without custom parsing logic per document type.
-
----
-
-## CI/CD
-
-GitHub Actions pipeline on every push:
-
-- Build Java services with Maven
-- Run unit and integration tests
-- Build Python service and run pytest
-- Build Docker images
-- Deploy to staging (on merge to `main`)
 
 ---
 
