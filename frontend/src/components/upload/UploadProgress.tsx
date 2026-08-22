@@ -1,8 +1,8 @@
 import React from "react";
-import { UploadState } from "../../hooks/useUpload";
+import type { UploadState } from "../../types";
 
 interface Props {
-  state: UploadState;
+  state: UploadState["status"];
   progress: number;
   fileName: string;
   documentId: string | null;
