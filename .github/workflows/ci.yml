@@ -40,3 +40,27 @@ jobs:
       - run: npm install
       - run: npm test -- --passWithNoTests
       - run: npm run build
+
+  java-services:
+    name: java-${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - upload-service
+          - processing-service
+          - analytics-service
+          - extraction-service
+    defaults:
+      run:
+        working-directory: backend/${{ matrix.service }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+          cache-dependency-path: backend/${{ matrix.service }}/pom.xml
+      - run: mvn --batch-mode --no-transfer-progress verify
