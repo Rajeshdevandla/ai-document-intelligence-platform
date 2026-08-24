@@ -3,7 +3,6 @@ package com.docplatform.extraction.consumer;
 import com.docplatform.extraction.dto.ExtractionRequest;
 import com.docplatform.extraction.model.ExtractionResult;
 import com.docplatform.extraction.service.ExtractionService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
