@@ -15,6 +15,6 @@ test('redirects signed-out users to the login screen', async () => {
 
   expect(await screen.findByRole('heading', { name: 'Sign In' })).toBeInTheDocument();
   expect(screen.getByText('AI Document Intelligence Platform')).toBeInTheDocument();
-  expect(screen.getByLabelText('Username')).toBeRequired();
-  expect(screen.getByLabelText('Password')).toBeRequired();
+  expect(screen.getByPlaceholderText('demo')).toBeRequired();
+  expect(screen.getByPlaceholderText('demo123')).toBeRequired();
 });
